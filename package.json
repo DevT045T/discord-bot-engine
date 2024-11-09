@@ -1,0 +1,24 @@
+{
+  "name": "discord-bot-engine",
+  "version": "1.0.0",
+  "description": "A Discord bot using discord.js",
+  "main": "src/bot.js",
+  "scripts": {
+    "start": "node src/bot.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/DevT045T/discord-bot-engine.git"
+  },
+  "keywords": ["discord", "bot", "discord.js"],
+  "author": "t045t",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DevT045T/discord-bot-engine/issues"
+  },
+  "homepage": "https://t045t.dev",
+  "dependencies": {
+    "discord.js": "^14.3.0"
+  }
+}
