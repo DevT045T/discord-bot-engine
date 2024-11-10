@@ -33,7 +33,7 @@ class BotInformation extends BotCommand {
       return;
     }
 
-    const canvas = createCanvas(400, 300); // Smaller canvas size
+    const canvas = createCanvas(400, 200); // Smaller canvas size
     const context = canvas.getContext('2d');
 
     // Draw a space background
@@ -49,11 +49,14 @@ class BotInformation extends BotCommand {
 
     // Get ping (latency)
     const ping = await this.getPing();
-    this.drawText(context, `Ping: ${ping !== -1 ? `${ping} ms` : 'Error fetching ping'}`, 20, 150, '15px Arial', '#ffffff');
+    this.drawText(context, `Ping: ${ping !== -1 ? `${ping} ms` : 'Error fetching ping'}`, 20, 120, '15px Arial', '#ffffff');
 
     // Fetch Git Username from Git config (if available)
     const gitUsername = this.getGitUsername() || 'Not Available'; // Fallback if no Git username is found
-    this.drawText(context, `Developer: ${gitUsername}`, 20, 180, '15px Arial', '#ffffff');
+    this.drawText(context, `Developer: ${gitUsername}`, 20, 150, '15px Arial', '#ffffff');
+
+    // Fetch Git Username from Git config (if available)
+    this.drawText(context, `Powered by https://t045t.dev/`, 310, 190, '5px Arial', '#ffffff');
 
     // Create the image attachment and send it to the channel
     const attachment = new AttachmentBuilder(canvas.toBuffer(), { name: 'BotInformation-image.png' });
@@ -61,22 +64,19 @@ class BotInformation extends BotCommand {
   }
 
   /**
-   * Fetches the number of servers the bot is in by making a request to the Discord API.
-   * @returns {Promise<number>} - The number of servers.
+   * Fetches the number of servers the bot is in from the cache.
+   * @returns {number} - The number of servers.
    */
   async getServerCount() {
     try {
-      const res = await axios.get('https://discord.com/api/v10/users/@me/guilds', {
-        headers: {
-          Authorization: `Bot ${config().bot_token}`, // Ensure the bot token is set in environment variables
-        },
-      });
-      return res.data.length;
+      // Use the guilds cache to get the number of servers
+      return global.botClient.guilds.cache.size;
     } catch (error) {
-      console.error('Error fetching server count:', error);
+      console.error('Error fetching server count from cache:', error);
       return 0;
     }
   }
+
 
   /**
    * Gets the bot's ping by sending a request to the Discord API.
