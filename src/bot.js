@@ -21,6 +21,7 @@ const path = require('path');
  * Set the projectRoot path for the cmd classes
  */
 global.projectRoot = path.resolve(__dirname);
+global.botClient = client;
 
 /**
  * Event listener that fires when the bot is ready.

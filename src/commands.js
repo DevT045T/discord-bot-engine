@@ -7,6 +7,10 @@ module.exports = () => {
         {
             "command": "level",
             "class": "Level"
+        },
+        {
+            "command": "leaderboard",
+            "class": "Leaderboard"
         } 
     ];
   };
