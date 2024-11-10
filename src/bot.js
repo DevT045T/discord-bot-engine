@@ -2,8 +2,9 @@ const { Client, GatewayIntentBits } = require('discord.js');
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildMembers,
         GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.MessageContent
     ],
 });
 const config = require('./config.js');
@@ -46,6 +47,20 @@ client.on('messageCreate', message => {
             }
         })
     }
+});
+
+client.on('guildMemberAdd', member => {
+    const welcomeClass = require(`./cmds/Welcome.js`);
+    const welcomer = new welcomeClass();
+    welcomer.message = member;
+    welcomer.execute();
+});
+
+client.on('guildMemberRemove', member => {
+    const leaveClass = require(`./cmds/Leave.js`);
+    const leaver = new leaveClass();
+    leaver.message = member;
+    leaver.execute();
 });
 
 // Log in to Discord using the bot token
