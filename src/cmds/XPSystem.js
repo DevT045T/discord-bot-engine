@@ -1,3 +1,4 @@
+const { EmbedBuilder } = require('discord.js');
 const config = require('../config.js');
 const BotCommand = require('../core/BotCommand.js');
 const fs = require('fs');
@@ -60,7 +61,7 @@ class XPSystem extends BotCommand {
      * If the user already has XP data, it will be incremented. If not, a new record will be created for the user.
      */
     addXPData(XP) {
-        const dataFilePath = path.join(global.projectRoot, 'data', `_${this.message.guild.id}.json`);
+        const dataFilePath = path.join(global.projectRoot, 'data', 'xp', `_${this.message.guild.id}.json`);
         const userID = this.message.author.id;
 
         // If the file does not exist, create it with an empty object as the content
@@ -104,7 +105,7 @@ class XPSystem extends BotCommand {
      * 
      */
     increaseRole() {
-        const dataFilePath = path.join(global.projectRoot, 'data', `_${this.message.guild.id}.json`);
+        const dataFilePath = path.join(global.projectRoot, 'data', 'xp', `_${this.message.guild.id}.json`);
         const userID = this.message.author.id;
 
         if (!fs.existsSync(dataFilePath)) {
@@ -118,7 +119,17 @@ class XPSystem extends BotCommand {
         if (calculatedLevel != xpData[userID].level) {
             xpData[userID].level = calculatedLevel;
             fs.writeFileSync(dataFilePath, JSON.stringify(xpData, null, 2));
-            this.message.channel.send(`Congratulations ${this.message.author}, you are now Level ${calculatedLevel}.`);
+
+            const levelUpEmbed = new EmbedBuilder()
+                .setColor('#6A329F')
+                .setTitle('🎉 Level Up! 🎉')
+                .setDescription(`Congratulations, ${this.message.author}! You are now **Level ${calculatedLevel}**.`)
+                .setThumbnail(this.message.author.displayAvatarURL({ dynamic: true }))
+                .addFields([{ name: 'Next Level', value: `Keep it up to reach Level ${calculatedLevel + 1}!`, inline: true }])
+                .setFooter({ text: `Great job, ${this.message.author.username}!` }) 
+                .setTimestamp();
+
+            this.message.channel.send({ embeds: [levelUpEmbed] });
         }
     }
 }

@@ -11,7 +11,11 @@
     "type": "git",
     "url": "https://github.com/DevT045T/discord-bot-engine.git"
   },
-  "keywords": ["discord", "bot", "discord.js"],
+  "keywords": [
+    "discord",
+    "bot",
+    "discord.js"
+  ],
   "author": "t045t",
   "license": "MIT",
   "bugs": {
@@ -19,6 +23,9 @@
   },
   "homepage": "https://t045t.dev",
   "dependencies": {
-    "discord.js": "^14.3.0"
+    "axios": "^1.7.7",
+    "canvas": "^2.11.2",
+    "discord.js": "^14.3.0",
+    "sharp": "^0.33.5"
   }
 }
