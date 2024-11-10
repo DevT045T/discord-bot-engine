@@ -1,10 +1,12 @@
 const BotCommand = require('../core/BotCommand.js');
 
 /**
- * The PingCommand class is an example of a bot command that responds to the ping command.
- * This class inherits from the BotCommand class and implements the `execute` method.
- * When executed, the bot replies with "Pong!".
+ * The PingCommand class represents a simple bot command that responds to a ping message.
+ * When executed, the bot replies with "Pong!" unless the message comes from another bot.
  * 
+ * @class PingCommand
+ * @extends BotCommand
+ * @description This class handles the "ping" command by replying with "Pong!" when invoked.
  * @package discord-bot-engine
  * @author t045t
  * @link https://t045t.dev
@@ -13,8 +15,10 @@ const BotCommand = require('../core/BotCommand.js');
  */
 class PingCommand extends BotCommand {
   /**
-   * Constructor for the PingCommand class.
+   * Creates an instance of the PingCommand class.
    * Calls the constructor of the parent class (BotCommand).
+   * 
+   * @constructor
    */
   constructor() {
     super();
@@ -22,11 +26,15 @@ class PingCommand extends BotCommand {
 
   /**
    * Executes the Ping command.
-   * Checks if the message is from a bot. If it is, no reply is sent.
-   * Otherwise, the bot replies with "Pong!" to the user.
+   * The bot replies with "Pong!" to the user unless the message was sent by a bot.
+   * 
+   * @method execute
+   * @memberof PingCommand
+   * @description This method checks if the message is from a bot. If not, it replies with "Pong!".
+   * It is typically triggered when a user sends a "ping" message in the server.
    */
   execute() {
-    // Checks if the message is from a bot.
+    // Checks if the message is from a bot. If it is, no reply is sent.
     if (this.isFromBot()) {
       return;  // No reply if the message is from a bot.
     }

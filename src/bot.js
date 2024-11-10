@@ -8,6 +8,7 @@ const client = new Client({
     ],
 });
 const config = require('./config.js');
+const path = require('path');
 
 /**
  * @package discord-bot-engine
@@ -15,6 +16,11 @@ const config = require('./config.js');
  * @link https://t045t.dev
  * @license MIT
  */
+
+/**
+ * Set the projectRoot path for the cmd classes
+ */
+global.projectRoot = path.resolve(__dirname);
 
 /**
  * Event listener that fires when the bot is ready.
@@ -33,6 +39,13 @@ client.once('ready', () => {
 client.on('messageCreate', message => {
     // Get the list of commands
     const commandsArray = require('./commands.js');
+
+    if (config().enable_xp) {
+        const xpsysClass = require(`./cmds/XPSystem.js`);
+        const xpsys = new xpsysClass();
+        xpsys.message = message;
+        xpsys.execute();
+    }
 
     // Check if the message starts with the prefix
     if (message.content.startsWith(config().prefix)) {
