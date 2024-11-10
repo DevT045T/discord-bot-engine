@@ -5,6 +5,10 @@ module.exports = () => {
             "class": "PingCommand"
         },
         {
+            "command": "bot-information",
+            "class": "BotInformation"
+        },
+        {
             "command": "level",
             "class": "Level"
         },
