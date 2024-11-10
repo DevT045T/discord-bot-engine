@@ -56,7 +56,7 @@ class BotInformation extends BotCommand {
     this.drawText(context, `Developer: ${gitUsername}`, 20, 150, '15px Arial', '#ffffff');
 
     // Fetch Git Username from Git config (if available)
-    this.drawText(context, `Powered by https://t045t.dev/`, 310, 190, '8px Arial', '#ffffff');
+    this.drawText(context, `Powered by https://t045t.dev/`, 290, 190, '7px Arial', '#ffffff');
 
     // Create the image attachment and send it to the channel
     const attachment = new AttachmentBuilder(canvas.toBuffer(), { name: 'BotInformation-image.png' });
