@@ -37,7 +37,7 @@ client.on('messageCreate', message => {
     if (message.content.startsWith(config().prefix)) {
         commandsArray().forEach(command => {
             // Check if the command in the message matches any of the commands in the list
-            if (command.command === message.content.replace(new RegExp(config().prefix), "")) {
+            if (command.command === message.content.replace(new RegExp(`\\${config().prefix}`), "")) {
                 // Dynamically require and instantiate the command class
                 const cmdClass = require(`./cmds/${command.class}.js`);
                 const cmd = new cmdClass();
