@@ -26,7 +26,10 @@ class Leaderboard extends BotCommand {
   }
 
   /**
-   * Executes the leaderboard command and generates an image with the top 10 users.
+   * Executes the leaderboard command, creating and sending an image showing the top 10 users' XP and levels.
+   * 
+   * @async
+   * @returns {Promise<void>}
    */
   async execute() {
     if (this.isFromBot()) {
@@ -42,51 +45,82 @@ class Leaderboard extends BotCommand {
     const rawData = fs.readFileSync(dataFilePath);
     let xpData = JSON.parse(rawData);
 
-    // Sort users by XP in descending order and get the top 10
     const sortedUsers = Object.entries(xpData)
       .map(([userID, data]) => ({ userID, xp: data.xp }))
       .sort((a, b) => b.xp - a.xp)
       .slice(0, 10);
 
-    // Create canvas for the leaderboard image
     const canvas = createCanvas(400, 500);
     const context = canvas.getContext('2d');
 
-    // Draw starry background
     this.drawStarryBackground(context, canvas.width, canvas.height);
 
     const xPosition = canvas.width / 2;
-    let yPosition = 70; // Starting position for text
+    let yPosition = 70;
 
-    // Display leaderboard and level information
     for (const [index, user] of sortedUsers.entries()) {
       const userID = user.userID;
       const currentXP = xpData[userID].xp;
       const levelBaseXP = config().xp_level_base;
       const calculatedLevel = Math.floor(currentXP / levelBaseXP);
 
-      // Load user data and avatar
-      const avatarBuffer = await this.loadImageFromUrl(`https://cdn.discordapp.com/avatars/${userID}/${this.message.guild.members.cache.get(userID)?.user.avatar}.png?size=256`);
+      // Get user data from Discord API for every user
+      const userData = await this.fetchUserData(userID);
+
+      const userAvatar = userData.avatar;
+      const userName = userData.username || "Unknown User"; // Default name if undefined
+
+      const avatarBuffer = await this.loadImageFromUrl(
+        `https://cdn.discordapp.com/avatars/${userID}/${userAvatar}.png?size=256`
+      );
       const pngBuffer = await sharp(avatarBuffer).png().toBuffer();
 
-      // Draw avatar and text on the canvas (avatar further to the right)
       await this.drawAvatar(context, pngBuffer, xPosition - 175, yPosition, 50);
-      this.drawText(context, `#${index + 1} ${this.message.guild.members.cache.get(userID)?.user.username}`, xPosition, yPosition + 20, 'bold 20px Arial', '#ffffff');
+      this.drawText(context, `#${index + 1} ${userName}`, xPosition, yPosition + 20, 'bold 20px Arial', '#ffffff');
       this.drawText(context, `Level: ${calculatedLevel}`, xPosition, yPosition + 40, '16px Arial', '#ffffff');
       this.drawText(context, `XP: ${currentXP}`, xPosition, yPosition + 60, '16px Arial', '#ffffff');
 
-      yPosition += 80; // Move to next row
+      yPosition += 80;
     }
 
-    // Create the attachment with the image
     const attachment = new AttachmentBuilder(canvas.toBuffer(), { name: 'Leaderboard-image.png' });
     this.message.channel.send({ files: [attachment] });
   }
 
   /**
-   * Loads an image from a given URL.
-   * @param {string} url The URL of the image to load.
+   * Fetches user data from the Discord API.
+   * 
+   * @async
+   * @param {string} userID - The Discord user ID.
+   * @returns {Promise<object>} The user data object.
+   * @throws {Error} If there is an error fetching user data.
+   */
+  async fetchUserData(userID) {
+    try {
+      const response = await axios.get(`https://discord.com/api/v10/users/${userID}`, {
+        headers: {
+          Authorization: `Bot ${config().bot_token}`,
+        },
+      });
+
+      const userData = response.data;
+      return {
+        username: userData.username,
+        avatar: userData.avatar || 'default',
+      };
+    } catch (error) {
+      throw new Error('Error fetching user data: ' + error.message);
+    }
+  }
+
+  /**
+   * Loads an image from a URL.
+   * If the URL is undefined or invalid, loads a default avatar image.
+   * 
+   * @async
+   * @param {string} url - The URL of the image.
    * @returns {Promise<Buffer>} The image buffer.
+   * @throws {Error} If there is an error downloading the image.
    */
   async loadImageFromUrl(url) {
     if (!url || url.includes('undefined')) {
@@ -103,16 +137,15 @@ class Leaderboard extends BotCommand {
 
   /**
    * Draws a starry background on the canvas.
-   * @param {CanvasRenderingContext2D} context The canvas context to draw on.
-   * @param {number} width The width of the canvas.
-   * @param {number} height The height of the canvas.
+   * 
+   * @param {CanvasRenderingContext2D} context - The canvas drawing context.
+   * @param {number} width - The width of the canvas.
+   * @param {number} height - The height of the canvas.
    */
   drawStarryBackground(context, width, height) {
-    // Black background
     context.fillStyle = '#000000';
     context.fillRect(0, 0, width, height);
 
-    // Add stars
     const numberOfStars = 100;
     for (let i = 0; i < numberOfStars; i++) {
       const x = Math.random() * width;
@@ -124,7 +157,6 @@ class Leaderboard extends BotCommand {
       context.fill();
     }
 
-    // Draw title at the top center
     context.fillStyle = '#ecf0f1';
     context.font = 'bold 30px Arial';
     const title = 'Leaderboard';
@@ -132,12 +164,14 @@ class Leaderboard extends BotCommand {
   }
 
   /**
-   * Draws an avatar on the canvas.
-   * @param {CanvasRenderingContext2D} context The canvas context to draw on.
-   * @param {Buffer} avatarBuffer The image buffer for the avatar.
-   * @param {number} x The x position to draw the avatar.
-   * @param {number} y The y position to draw the avatar.
-   * @param {number} size The size of the avatar.
+   * Draws the user's avatar on the canvas.
+   * 
+   * @async
+   * @param {CanvasRenderingContext2D} context - The canvas drawing context.
+   * @param {Buffer} avatarBuffer - The avatar image buffer.
+   * @param {number} x - The x position to draw the avatar.
+   * @param {number} y - The y position to draw the avatar.
+   * @param {number} size - The size of the avatar.
    */
   async drawAvatar(context, avatarBuffer, x, y, size) {
     const avatarImage = await loadImage(avatarBuffer);
@@ -150,13 +184,14 @@ class Leaderboard extends BotCommand {
   }
 
   /**
-   * Draws text on the canvas.
-   * @param {CanvasRenderingContext2D} context The canvas context to draw on.
-   * @param {string} text The text to display.
-   * @param {number} x The x position to draw the text.
-   * @param {number} y The y position to draw the text.
-   * @param {string} font The font style of the text.
-   * @param {string} color The color of the text.
+   * Draws text on the canvas at a specified position.
+   * 
+   * @param {CanvasRenderingContext2D} context - The canvas drawing context.
+   * @param {string} text - The text to draw.
+   * @param {number} x - The x position to draw the text.
+   * @param {number} y - The y position to draw the text.
+   * @param {string} font - The font to use for the text.
+   * @param {string} color - The color of the text.
    */
   drawText(context, text, x, y, font, color) {
     context.fillStyle = color;
