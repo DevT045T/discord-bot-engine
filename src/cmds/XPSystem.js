@@ -81,7 +81,7 @@ class XPSystem extends BotCommand {
             if (xpData[userID]) {
                 xpData[userID].xp += XP;
             } else {
-                xpData[userID] = { xp: XP, level: 1 };  // Start the user at level 1
+                xpData[userID] = { xp: XP, level: 0 };  // Start the user at level 1
             }
 
             // Write the updated data back to the file
